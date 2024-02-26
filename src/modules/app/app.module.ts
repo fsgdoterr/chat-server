@@ -7,6 +7,7 @@ import { configModuleOptions } from 'src/config/config';
 import { mongooseModuleAsyncOptions } from 'src/config/mongoose';
 import { JwtModule } from 'src/services/jwt/jwt.module';
 import { RepositoryModule } from 'src/services/repositories/repository/repository.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { RepositoryModule } from 'src/services/repositories/repository/repositor
         NestJwtModule.register({}),
         JwtModule,
         RepositoryModule,
+        AuthModule,
     ],
 })
 export class AppModule {}
