@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import * as uuid from 'uuid';
 import { instanceToPlain } from 'class-transformer';
 import { JwtService } from 'src/services/jwt/jwt.service';
+import { SignInDto } from './dtos/signin.dto';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,30 @@ export class AuthService {
         const user = await this.userRepository.findById(newUser._id);
 
         const userData = instanceToPlain(this.userRepository.toResponse(user));
+
+        const { accessToken, refreshToken } = await this.jwt.generateTokens(userData);
+
+        this.userRepository.findByIdAndUpdate(userData.id, {refreshToken});
+
+        return { accessToken, refreshToken };
+    }
+
+    async signin({usernameEmail, password}: SignInDto) {
+        const candidate = await this.userRepository.findOne({$or: [
+            {email: usernameEmail},
+            {username: usernameEmail}
+        ]});
+
+        if(!candidate)
+            throw new BadRequestException('This user does not exist');
+
+        const isEqual = await bcrypt.compare(password, candidate.password);
+
+        if(!isEqual)
+            throw new BadRequestException('This user does not exist');
+
+
+        const userData = instanceToPlain(this.userRepository.toResponse(candidate));
 
         const { accessToken, refreshToken } = await this.jwt.generateTokens(userData);
 
