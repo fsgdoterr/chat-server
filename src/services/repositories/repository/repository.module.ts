@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
+import { UserRepositoryModule } from '../user-repository/user-repository.module';
 
 @Module({
-    imports: [],
+    imports: [
+        UserRepositoryModule,
+    ],
 })
 export class RepositoryModule {}
