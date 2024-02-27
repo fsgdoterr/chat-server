@@ -8,6 +8,7 @@ import { mongooseModuleAsyncOptions } from 'src/config/mongoose';
 import { JwtModule } from 'src/services/jwt/jwt.module';
 import { RepositoryModule } from 'src/services/repositories/repository/repository.module';
 import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from '../auth/auth.module';
         JwtModule,
         RepositoryModule,
         AuthModule,
+        UserModule,
     ],
 })
 export class AppModule {}
