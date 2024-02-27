@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserRepositoryService } from 'src/services/repositories/user-repository/user-repository.service';
 import { SignUpDto } from './dtos/signup.dto';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +6,7 @@ import * as uuid from 'uuid';
 import { instanceToPlain } from 'class-transformer';
 import { JwtService } from 'src/services/jwt/jwt.service';
 import { SignInDto } from './dtos/signin.dto';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -31,15 +32,7 @@ export class AuthService {
             username,
         });
 
-        const user = await this.userRepository.findById(newUser._id);
-
-        const userData = instanceToPlain(this.userRepository.toResponse(user));
-
-        const { accessToken, refreshToken } = await this.jwt.generateTokens(userData);
-
-        this.userRepository.findByIdAndUpdate(userData.id, {refreshToken});
-
-        return { accessToken, refreshToken };
+        return await this.refresh(newUser._id);
     }
 
     async signin({usernameEmail, password}: SignInDto) {
@@ -56,13 +49,20 @@ export class AuthService {
         if(!isEqual)
             throw new BadRequestException('This user does not exist');
 
+        return await this.refresh(candidate._id);
+    }
+
+    async refresh(id: string | Types.ObjectId) {
+        const candidate = await this.userRepository.findById(id);
+        if(!candidate)
+            throw new UnauthorizedException();
 
         const userData = instanceToPlain(this.userRepository.toResponse(candidate));
 
         const { accessToken, refreshToken } = await this.jwt.generateTokens(userData);
 
         this.userRepository.findByIdAndUpdate(userData.id, {refreshToken});
-
+    
         return { accessToken, refreshToken };
     }
 
