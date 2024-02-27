@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { AccessJwtGuard } from 'src/common/guards/access-jwt-guard';
 import { User } from 'src/common/decorators/user.decorator';
@@ -42,6 +42,17 @@ export class ChatController {
         @Param('chatId') chatId: string,
     ) {
         return await this.chatService.enter(userId, chatId);
+    }
+
+    @Delete('/exit/:chatId')
+    @UseGuards(AccessJwtGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    async exit(
+        @User('id') userId: string,
+        @Param('chatId') chatId: string,
+    ) {
+        this.chatService.exit(userId, chatId);
+        return;
     }
 
 }

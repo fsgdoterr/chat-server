@@ -96,7 +96,31 @@ export class ChatService {
         return this.chatRepository.toResponse(chatData);
     }
 
+    async exit(userId: string, chatId: string) {
+        const chat = await this.chatRepository.findByIdAndUpdate(chatId, {
+            $pull: {
+                members: userId,
+                owners: userId,
+            }
+        });
+
+        if(!chat)
+            throw new BadRequestException('Invalid id');
+
+        await this.userRepository.findByIdAndUpdate(userId, {
+            $pull: {
+                chats: { chat: chatId },
+            }
+        });
+
+    }
+
     private async addToChats(chatId: string | Types.ObjectId, userId: string | Types.ObjectId) {
+        const user = await this.userRepository.findById(userId);
+        const chatExists = user.chats.some(chat => chat.chat.equals(chatId));
+
+        if(chatExists) return;
+
         return await this.userRepository.findByIdAndUpdate(userId, {
             $addToSet: {chats: {
                 chat: chatId,
