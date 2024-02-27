@@ -9,6 +9,7 @@ import { JwtModule } from 'src/services/jwt/jwt.module';
 import { RepositoryModule } from 'src/services/repositories/repository/repository.module';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { UserModule } from '../user/user.module';
         RepositoryModule,
         AuthModule,
         UserModule,
+        ChatModule,
     ],
 })
 export class AppModule {}
