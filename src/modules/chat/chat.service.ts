@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { ChatRepositoryService } from 'src/services/repositories/chat-repository/chat-repository.service';
 import { UserRepositoryService } from 'src/services/repositories/user-repository/user-repository.service';
 import { CreateChatDto } from './dtos/create-chat.dto';
@@ -127,6 +127,37 @@ export class ChatService {
         await this.chatRepository.findByIdAndDelete(chatId);
 
         this.userRepository.findByIdAndUpdate(userId, {
+            $pull: {
+                chats: { chat: chatId },
+            }
+        });
+
+        return;
+    }
+
+    async kick(
+        userId: string,
+        chatId: string,
+        kickUserId: string,
+    ) {
+
+        const chat = await this.chatRepository.findOneAndUpdate({
+            _id: chatId,
+            $or: [
+                {mainOwner: userId},
+                {owners: userId},
+            ],
+        }, {
+            $pull: {
+                members: userId,
+                owners: userId,
+            }
+        });
+
+        if(!chat)
+            throw new ForbiddenException('You dont have permissions');
+
+        this.userRepository.findByIdAndUpdate(kickUserId, {
             $pull: {
                 chats: { chat: chatId },
             }

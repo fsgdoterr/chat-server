@@ -66,4 +66,16 @@ export class ChatController {
         return;
     }
 
+    @Delete('/kick/:chatId/:userId')
+    @UseGuards(AccessJwtGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    async kick(
+        @User('id') userId: string,
+        @Param('chatId') chatId: string,
+        @Param('userId') kickUserId: string,
+    ) {
+        await this.chatService.kick(userId, chatId, kickUserId);
+        return;
+    }
+
 }
