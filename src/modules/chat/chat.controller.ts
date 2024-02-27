@@ -55,4 +55,15 @@ export class ChatController {
         return;
     }
 
+    @Delete('/:chatId')
+    @UseGuards(AccessJwtGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    async delete(
+        @User('id') userId: string,
+        @Param('chatId') chatId: string,
+    ) {
+        await this.chatService.delete(userId, chatId);
+        return;
+    }
+
 }

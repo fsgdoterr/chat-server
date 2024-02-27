@@ -115,6 +115,26 @@ export class ChatService {
 
     }
 
+    async delete(userId: string, chatId: string) {
+        const chat = await this.chatRepository.findOne({_id: chatId, mainOwner: userId});
+
+        if(!chat)
+            throw new BadRequestException('Invalid id, or you dont have permissions');
+
+        if(chat.members.length > 1)
+            throw new BadRequestException('You can\'t delete a chat if there are still participants in it');
+
+        await this.chatRepository.findByIdAndDelete(chatId);
+
+        this.userRepository.findByIdAndUpdate(userId, {
+            $pull: {
+                chats: { chat: chatId },
+            }
+        });
+
+        return;
+    }
+
     private async addToChats(chatId: string | Types.ObjectId, userId: string | Types.ObjectId) {
         const user = await this.userRepository.findById(userId);
         const chatExists = user.chats.some(chat => chat.chat.equals(chatId));
