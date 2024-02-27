@@ -66,4 +66,10 @@ export class AuthService {
         return { accessToken, refreshToken };
     }
 
+    async logout(id: string) {
+        const candidate = await this.userRepository.findByIdAndUpdate(id, {refreshToken: undefined});
+
+        return candidate;
+    }
+
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/signup.dto';
 import { ETime } from 'src/common/constants/time';
@@ -50,6 +50,19 @@ export class AuthController {
         res.cookie('refreshToken', refreshToken, { maxAge: 7 * ETime.DAY, httpOnly: true });
 
         return {token: accessToken};
+    }
+
+    @Delete('/logout')
+    @UseGuards(RefreshJwtGuard)
+    async logout(
+        @Res({passthrough: true}) res,
+        @User('id') id: string,
+    ) {
+        this.authService.logout(id);
+
+        res.clearCookie('refreshToken');
+
+        return;
     }
 
 }
