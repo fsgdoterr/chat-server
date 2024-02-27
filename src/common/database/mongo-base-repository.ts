@@ -1,4 +1,4 @@
-import { AnyKeys, Document, FilterQuery, Model, ProjectionType, QueryOptions, Types, UpdateQuery } from "mongoose";
+import { AggregateOptions, AnyKeys, Document, FilterQuery, Model, PipelineStage, ProjectionType, QueryOptions, Types, UpdateQuery } from "mongoose";
 
 export abstract class MongoBaseRepository<TDocument extends Document> {
 
@@ -66,6 +66,10 @@ export abstract class MongoBaseRepository<TDocument extends Document> {
         filter: FilterQuery<TDocument>,
     ) {
         return await this.model.countDocuments(filter);
+    }
+
+    async aggregate(pipeline?: PipelineStage[], options?: AggregateOptions) {
+        return await this.model.aggregate(pipeline, options);
     }
 
 }
