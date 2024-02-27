@@ -23,10 +23,10 @@ export class Chat {
     mainOwner: User;
     
     @Prop({type: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]})
-    owners: string;
+    owners: User[];
     
     @Prop({type: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]})
-    members: string;
+    members: User[];
     
     createdAt: Date;
 }
