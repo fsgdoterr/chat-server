@@ -1,8 +1,7 @@
 import { Exclude, Expose } from "class-transformer";
 import { Types } from "mongoose";
 
-export class UserResponseDto {
-
+export default class PublicUserResponseDto {
     @Exclude()
     _id: Types.ObjectId;
 
@@ -12,8 +11,10 @@ export class UserResponseDto {
     }
 
     username: string;
-    email: string;
     avatar: string;
+    
+    @Exclude()
+    email: string;
 
     @Exclude()
     password: string;
@@ -24,10 +25,10 @@ export class UserResponseDto {
     @Exclude()
     chats: any;
     
+    @Exclude()
     createdAt: Date;
 
-
-    constructor(data: Partial<UserResponseDto>) {
+    constructor(data: Partial<PublicUserResponseDto>) {
         Object.assign(this, data);
     }
 }
