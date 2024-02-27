@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, HttpCode, HttpStatus, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { AccessJwtGuard } from 'src/common/guards/access-jwt-guard';
 import { User } from 'src/common/decorators/user.decorator';
@@ -32,6 +32,16 @@ export class ChatController {
         @UploadedFile() file: Express.Multer.File
     ) {
         return await this.chatService.update(chatId, userId, dto, file);
+    }
+
+    @Get('/enter/:chatId')
+    @UseGuards(AccessJwtGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    async enter(
+        @User('id') userId: string,
+        @Param('chatId') chatId: string,
+    ) {
+        return await this.chatService.enter(userId, chatId);
     }
 
 }

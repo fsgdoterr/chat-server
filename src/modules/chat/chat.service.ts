@@ -5,6 +5,7 @@ import { CreateChatDto } from './dtos/create-chat.dto';
 import { Types } from 'mongoose';
 import { UpdateChatDto } from './dtos/update-chat.dto';
 import { FileService } from 'src/services/file/file.service';
+import { UserDocument } from 'src/services/repositories/user-repository/schemas/user.schema';
 
 @Injectable()
 export class ChatService {
@@ -73,6 +74,22 @@ export class ChatService {
         }
 
         await chat.save();
+
+        const chatData = await this.chatRepository.findById(chat._id);
+
+        return this.chatRepository.toResponse(chatData);
+    }
+
+    async enter(userId: string, chatId: string) {
+
+        const chat = await this.chatRepository.findByIdAndUpdate(chatId, {
+            $addToSet: {members: userId},
+        });
+
+        if(!chat)
+            throw new BadRequestException('Invalid id');
+
+        this.addToChats(chatId, userId);
 
         const chatData = await this.chatRepository.findById(chat._id);
 
