@@ -2,10 +2,11 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { ChatRepositoryService } from 'src/services/repositories/chat-repository/chat-repository.service';
 import { UserRepositoryService } from 'src/services/repositories/user-repository/user-repository.service';
 import { CreateChatDto } from './dtos/create-chat.dto';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { UpdateChatDto } from './dtos/update-chat.dto';
 import { FileService } from 'src/services/file/file.service';
 import { UserDocument } from 'src/services/repositories/user-repository/schemas/user.schema';
+import { ChatDocument } from 'src/services/repositories/chat-repository/schemas/chat.schema';
 
 @Injectable()
 export class ChatService {
@@ -164,6 +165,25 @@ export class ChatService {
         });
 
         return;
+    }
+
+    async getAll(
+        userId: string,
+    ) { 
+        const user = await this.userRepository.findById(userId, {}, {populate: 'chats.chat'});
+
+        const chats = user.chats.map(c => {
+            const chat = c.chatType === 'Chat'
+                ? this.chatRepository.toResponse(c.chat as unknown as ChatDocument)
+                : this.userRepository.toResponse(c.chat as unknown as UserDocument, 'public');
+
+            return {
+                chatType: c.chatType,
+                chat,
+            }
+        })
+
+        return chats;
     }
 
     private async addToChats(chatId: string | Types.ObjectId, userId: string | Types.ObjectId) {

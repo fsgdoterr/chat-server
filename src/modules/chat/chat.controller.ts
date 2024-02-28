@@ -78,4 +78,13 @@ export class ChatController {
         return;
     }
 
+    @Get('/')
+    @UseGuards(AccessJwtGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    async getAll(
+        @User('id') userId: string,
+    ) {
+        return await this.chatService.getAll(userId);
+    }
+
 }
