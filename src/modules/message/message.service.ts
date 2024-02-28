@@ -77,4 +77,61 @@ export class MessageService {
         return this.messageRepository.toResponse(messageData);
     }
 
+    async getAll(
+        userId: string,
+        chatId: string,
+        chatType: 'Chat' | 'User',
+        limit: number = 20,
+        offset: number = 0
+    ) {
+        if(chatType === 'Chat') return await this.getAllChatMessage(userId, chatId, limit, offset);
+
+        return await this.getAllUserMessage(userId, chatId, limit, offset);
+    }
+
+    async getAllChatMessage(
+        userId: string,
+        chatId: string,
+        limit: number = 20,
+        offset: number = 0
+    ) {
+        const chat = await this.chatRepository.findById(chatId);
+
+        if(!chat)
+            throw new BadRequestException('Invalid id');
+
+        if(!chat.members.some(member => (member as unknown as Types.ObjectId).equals(userId)))
+            throw new ForbiddenException('You are not a chat participant');
+
+        const messages = await this.messageRepository.find({receiver: chatId}, {}, {
+            populate: 'sender',
+            limit,
+            skip: offset,
+            sort: { createdAt: -1 },
+        });
+
+        return messages.map(this.messageRepository.toResponse);
+    }
+
+    async getAllUserMessage(
+        userId: string,
+        chatId: string,
+        limit: number = 20,
+        offset: number = 0
+    ) {
+        const messages = await this.messageRepository.find({
+            $or: [
+                {receiver: chatId, sender: userId},
+                {receiver: userId, sender: chatId},
+            ]
+        }, {}, {
+            populate: 'sender',
+            limit,
+            skip: offset,
+            sort: { createdAt: -1 },
+        });
+
+        return messages.map(this.messageRepository.toResponse);  
+    }
+
 }
