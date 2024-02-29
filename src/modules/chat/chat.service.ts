@@ -186,6 +186,42 @@ export class ChatService {
         return chats;
     }
 
+    async search(
+        userId: string,
+        search: string,
+        chatType?: 'Chat' | 'User',
+        limit: number = 10,
+        offset: number = 0
+    ) {
+        const response: {
+            chats?: any[],
+            chatsCount?: number,
+            users?: any[],
+            usersCount?: number;
+        } = {};
+        if(chatType === 'Chat' || !chatType) {
+            const query = {
+                $or: [{slug: new RegExp(search, 'i')}, {name: new RegExp(search, 'i')}]
+            };
+
+            response.chats = await this.chatRepository.find(query, {}, {populate: 'mainOwner owners', limit, skip: offset});
+            response.chatsCount = await this.chatRepository.countDocuments(query);
+        }
+        if(chatType === 'User'|| !chatType) {
+            const query = {
+                username: new RegExp(search, 'i'),
+            };
+
+            response.users = await this.userRepository.find(query, {}, {limit, skip: offset});
+            response.usersCount = await this.userRepository.countDocuments(query);
+        }
+
+        if(response.chats) response.chats = response.chats.map(c => this.chatRepository.toResponse(c));
+        if(response.users) response.users = response.users.map(u => this.userRepository.toResponse(u, 'public'));
+
+        return response;
+    }
+
     private async addToChats(chatId: string | Types.ObjectId, userId: string | Types.ObjectId) {
         const user = await this.userRepository.findById(userId);
         const chatExists = user.chats.some(chat => chat.chat.equals(chatId));
