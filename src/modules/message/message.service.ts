@@ -134,4 +134,12 @@ export class MessageService {
         return messages.map(this.messageRepository.toResponse);  
     }
 
+    async getLastMessage(
+        userId: string,
+        chatId: string,
+        chatType: 'Chat' | 'User',
+    ) {
+        return await this.getAll(userId, chatId, chatType, 1, 0);
+    }
+
 }

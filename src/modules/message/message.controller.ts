@@ -37,4 +37,15 @@ export class MessageController {
         return messages;
     }
 
+    @Get('/last-message/:chatId')
+    @UseGuards(AccessJwtGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
+    async getLastMessage(
+        @User('id') userId: string,
+        @Param('chatId') chatId: string,
+        @Query('_chat-type', new ChatTypePipe()) _chatType: 'User' | 'Chat',
+    ) {
+        return await this.messageService.getLastMessage(userId, chatId, _chatType);
+    }
+
 }
